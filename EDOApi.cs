@@ -11,7 +11,33 @@ namespace EDOApi
     {
     Diadoc, Courier
     }
-    public interface Connector
+    public enum DocType
+    {
+    Nonformal,
+    Invoice,
+    Act,
+    Torg12,
+    UTD,
+    UKD
+    }
+    public enum UTDFunction
+    { 
+    INV,
+    INVDOP,
+    DOP
+    }
+    public class Party 
+    {
+    }
+    public class Document {
+        public string Number { get; set; }
+        public DateTime Date { get; set; }
+        public DocType Type { get; set; }
+        public Party Sender { get; set; }
+        public Party Receiver { get; set; }
+        public Decimal Amount { get; set; }
+    }
+    public interface IEDOConnector
     {
         public Operator Operator
         {
@@ -25,9 +51,11 @@ namespace EDOApi
         
         
         }
-
+        public Array a
+        { 
+        }
     }
-    public class BaseConnector : Connector
+    public class EDOConnector : IEDOConnector
     {
         public Operator Operator
         {
@@ -41,10 +69,10 @@ namespace EDOApi
         {
             return false;
         }
-        public BaseConnector()
+        public EDOConnector()
         { 
         }
-        public BaseConnector Construct(Operator EdoOperator)
+        public EDOConnector Construct(Operator EdoOperator)
         {
             switch (EdoOperator)
             {
@@ -63,7 +91,7 @@ namespace EDOApi
             }
         }
     }
-    public class CourierConnector : BaseConnector, Connector
+    public class CourierConnector : EDOConnector, IEDOConnector
     {
         public const Operator Operator = Operator.Courier;
         private Korus.Eds.Api.RestClient  client;
@@ -81,13 +109,13 @@ namespace EDOApi
             return false;        
         }
     }
-    public class DiadocConnector :BaseConnector , Connector
+    public class DiadocConnector :EDOConnector , IEDOConnector
     {
         public const Operator Operator = Operator.Diadoc;
         public const string apiUrl = "a";
         private Diadoc.Api.Cryptography.WinApiCrypt crypt;
         public string ApiKey { get; set; }
-        private string token { get; set; }
+        private string token;
         private Diadoc.Api.DiadocApi api;
         public Boolean Connect()
         {
