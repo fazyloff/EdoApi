@@ -7,7 +7,7 @@ using Diadoc.Api;
 using Korus.Eds.Api;
 namespace EDOApi
 {
-    public enum Operator
+    public enum EdoOperator
     {
     Diadoc, Courier
     }
@@ -39,25 +39,20 @@ namespace EDOApi
     }
     public interface IEDOConnector
     {
-        public Operator Operator
+        EdoOperator Operator
         {
             get;
             set;
         }
-        public string Login { }
-        public string Password { }
-        public Boolean connect
-        { 
+         string Login { get; set; }
+         string Password { get; set; }
+         Boolean Connect();
+       
         
-        
-        }
-        public Array a
-        { 
-        }
     }
     public class EDOConnector : IEDOConnector
     {
-        public Operator Operator
+        public EdoOperator Operator
         {
             get;
             set;
@@ -72,33 +67,33 @@ namespace EDOApi
         public EDOConnector()
         { 
         }
-        public EDOConnector Construct(Operator EdoOperator)
+        public static EDOConnector construct(EdoOperator EdoOperator)
         {
             switch (EdoOperator)
             {
-                case Operator.Courier:
+                case EdoOperator.Courier:
                     {
                         return new CourierConnector ();
                     }
-                case Operator.Diadoc:
+                case EdoOperator.Diadoc:
                     {
                         return new DiadocConnector();
                     }
                 default:
                     {
-                        return this;                        
+                        return new EDOConnector();                        
                     }
             }
         }
     }
     public class CourierConnector : EDOConnector, IEDOConnector
     {
-        public const Operator Operator = Operator.Courier;
+        public const EdoOperator Operator = EdoOperator.Courier;
         private Korus.Eds.Api.RestClient  client;
         private string token;
         public Boolean Connect()
         {
-            RestSharp.IRestResponse<Korus.Eds.Api.LogonResponse > resp = client.Login(this.Login, this.Password);
+            RestSharp.IRestResponse<Korus.Eds.Api.LogonResponse> resp = client.Login(this.Login, this.Password);
             if (resp.StatusCode == System.Net .HttpStatusCode.OK)
             {
                 this.token = resp.Content;
@@ -108,10 +103,16 @@ namespace EDOApi
 
             return false;        
         }
+        public CourierConnector()
+        {
+            client = new RestClient();
+        
+        }
+
     }
     public class DiadocConnector :EDOConnector , IEDOConnector
     {
-        public const Operator Operator = Operator.Diadoc;
+        public const EdoOperator Operator =EdoOperator.Diadoc;
         public const string apiUrl = "a";
         private Diadoc.Api.Cryptography.WinApiCrypt crypt;
         public string ApiKey { get; set; }
